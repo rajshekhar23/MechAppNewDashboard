@@ -1,0 +1,87 @@
+<div class="animated fadeIn">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class='row'>
+            <div class='col-md-1'>
+              <label> Type </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="vehicleType" (change)='getAllBrandByVehicleType()'>
+                <option *ngFor='let type of vehicleTypeList' [value]='type.id'>{{type.type}}</option>
+              </select>
+            </div>
+            <div class='col-md-1'>
+              <label> Brand </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="brandname" (change)='getAllModelList()'>
+                <option *ngFor='let type of brandList' [value]='type.id'>{{type.brandname}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+  <!-- Button trigger modal -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Vehicle Model List
+          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(content)'>
+            <i class="fa fa-plus"></i> Add New</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-condensed table-sm">
+            <thead>
+              <tr class='text-center'>
+                <td>No.</td>
+                <td>Vehicle Model Name</td>
+                <td>Edit</td>
+                <td>Remove</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of modelList; let i = index" class='text-center'>
+                <td>{{i + 1}}</td>
+                <td>{{row.modelname}}</td>
+                <td (click)='editBrand(row, content)'>
+                  <i class="customIcons cui-pencil"></i>
+                </td>
+                <td (click)='removeBrand(row)'>
+                  <i class="customIcons cui-circle-x"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+</div>
+
+<!-- Modal -->
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <b *ngIf='isUpdate'>Update Model</b>
+    <b *ngIf='!isUpdate'>Add New Model</b>
+    <button type="button" class="close" (click)='closeModal()'>&times;</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Username" [(ngModel)]='modelname' [ngModelOptions]="{standalone: true}"
+          name='modelname' required="required">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewModel()' [disabled]='!modelname'>Add Model</button>
+        <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateModel()' [disabled]='!modelname'>Update Model</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
