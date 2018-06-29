@@ -1,3 +1,4 @@
+import { Variant } from './../../../models/variants';
 import { Model } from './../../../models/models';
 import { Router } from '@angular/router';
 import { FirestoreDataService } from './../../../firestore-data.service';
@@ -14,14 +15,21 @@ import * as $ from 'jquery';
 })
 export class ListBrandComponent implements OnInit {
   vehicleTypeList: any;
+  variantList: Variant[];
   brandList: Vehicle[];
-  selectedVehicleType: string;
   modelList: Model[];
+  selectedModel: string;
+  selectedVehicleType: string;
   selectedBrand: string;
   modelname: string;
+  isBrandListEmpty: any;
+  isModelListEmpty: any;
+  isVariantListEmpty: any;
   brandname: string;
+  variantname: string;
   modelId: string;
   brandId: string;
+  variantId: string;
   ngModelRef: any;
   isUpdate: any;
   $: any;
@@ -30,9 +38,10 @@ export class ListBrandComponent implements OnInit {
 
   ngOnInit() {
     this.isUpdate = false;
-    this.selectedVehicleType = 'ctcwAzaVpGYzIhnHNDuq';
+    this.selectedVehicleType = 'pM0luQDMCvCvDxJcedDn';
     this._firestoreDataService.getVehicleMasterList().subscribe( data => {
       this.vehicleTypeList = data;
+      console.log(this.vehicleTypeList);
       this.getAllBrandByVehicleType();
     });
   }
@@ -40,13 +49,30 @@ export class ListBrandComponent implements OnInit {
   getAllBrandByVehicleType() {
     this._firestoreDataService.getAllBrandByVehicleType(this.selectedVehicleType).subscribe( brandList => {
       this.brandList = brandList;
-      this.selectedBrand = this.brandList[0].id;
-      this.getAllModelList();
+      if (this.brandList.length !== 0) {
+        this.isBrandListEmpty = false;
+        this.selectedBrand = this.brandList[0].id;
+        this.getAllModelList();
+      } else {
+        this.isBrandListEmpty = true;
+      }
     });
   }
 
   getSelectedType() {
+    this.clearAll();
     this.getAllBrandByVehicleType();
+  }
+
+  clearAll() {
+    this.selectedBrand = '';
+    this.selectedModel = '';
+    this.variantList = [];
+    this.modelList = [];
+    this.brandList =  [];
+    this.isBrandListEmpty = true;
+    this.isModelListEmpty = true;
+    this.isVariantListEmpty = true;
   }
 
   openModal(content) {
@@ -57,7 +83,19 @@ export class ListBrandComponent implements OnInit {
   addNewBrand() {
     this._firestoreDataService.addVehicleBrand(this.brandname, this.selectedVehicleType);
     this.ngModelRef.close();
-    this.selectedBrand = '';
+    this.brandname = '';
+  }
+
+  addNewModel() {
+    this._firestoreDataService.addVehicleModel(this.selectedVehicleType, this.selectedBrand, this.modelname);
+    this.ngModelRef.close();
+    this.modelname = '';
+  }
+
+  addNewVariant() {
+    this._firestoreDataService.addVehicleVariant(this.selectedVehicleType, this.selectedBrand, this.selectedModel, this.variantname);
+    this.ngModelRef.close();
+    this.variantname = '';
   }
 
   closeModal() {
@@ -79,6 +117,12 @@ export class ListBrandComponent implements OnInit {
     this.isUpdate = true;
   }
 
+  editVariant(variantDetails, content) {
+    this.variantname = variantDetails.variantname;
+    this.variantId = variantDetails.id;
+    this.ngModelRef = this.modalService.open(content, { centered: true});
+    this.isUpdate = true;
+  }
   updateBrand() {
     this._firestoreDataService.updateVehicleBrand(this.brandId, this.brandname, this.selectedVehicleType);
     this.ngModelRef.close();
@@ -95,39 +139,69 @@ export class ListBrandComponent implements OnInit {
     this.isUpdate = false;
   }
 
-  addNewModel() {
-    this._firestoreDataService.addVehicleModel(this.selectedVehicleType, this.selectedBrand, this.modelname);
+  updateVariant() {
+    this._firestoreDataService.updateVariant(this.selectedVehicleType, this.selectedBrand, this.selectedModel, this.variantId,
+    this.variantname);
     this.ngModelRef.close();
-    this.modelname = '';
-  }
-
-  removeModel(modelDetails) {
-    if (confirm('Are you sure to remove Model')) {
-      this._firestoreDataService.removeModel(this.selectedVehicleType, this.selectedBrand, modelDetails.id);
-    }
+    this.variantId = '';
+    this.variantname = '';
+    this.isUpdate = false;
   }
 
   removeBrand(brandDetails) {
     if (confirm('Are you sure to remove brand')) {
       this._firestoreDataService.removeBrand(brandDetails.id, this.selectedVehicleType);
+      this.getAllModelList();
+    }
+  }
+
+  removeModel(modelDetails) {
+    if (confirm('Are you sure to remove Model')) {
+      this._firestoreDataService.removeModel(this.selectedVehicleType, this.selectedBrand, modelDetails.id);
+      this.getAllVariantList();
+    }
+  }
+
+  removeVariant(variantDetails) {
+    if (confirm('Are you sure to remove variant')) {
+      this._firestoreDataService.removeVariant(this.selectedVehicleType, this.selectedBrand, this.selectedModel, variantDetails.id);
     }
   }
 
   showModelsList(brandDetails) {
     this.selectedBrand = brandDetails.id;
     this.getAllModelList();
-  /*  localStorage.clear();
-    brandDetails.selectedVehicleType = this.selectedVehicleType;
-    localStorage.setItem('brand', JSON.stringify(brandDetails));
-    //this.router.navigate(['/buttons/list-model']);
-  */
   }
 
   getAllModelList() {
     this._firestoreDataService.getAllModels(this.selectedVehicleType, this.selectedBrand).subscribe( data => {
       this.modelList = data;
-      console.log(data);
+      if (this.modelList.length !== 0) {
+        this.isModelListEmpty = false;
+        this.selectedModel = this.modelList[0].id;
+        this.getAllVariantList();
+      } else {
+        this.isModelListEmpty = true;
+      }
     });
+  }
+
+  getAllVariantList() {
+    this._firestoreDataService.getAllVariant(this.selectedVehicleType, this.selectedBrand, this.selectedModel).subscribe( data => {
+      this.variantList = data;
+      if (this.variantList.length !== 0) {
+        this.isVariantListEmpty = false;
+      } else {
+        this.isVariantListEmpty = true;
+      }
+    });
+  }
+
+  showVariantsList(modelDetails) {
+    this.modelname = modelDetails.modelname;
+    this.modelId = modelDetails.modelId;
+    this.selectedModel = modelDetails.id;
+    this.getAllVariantList();
   }
 
 }

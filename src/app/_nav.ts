@@ -98,11 +98,6 @@ export const navItems = [
         name: 'List Brand',
         url: '/buttons/list-brand',
         icon: 'icon-cursor'
-      },
-      {
-        name: 'List Model',
-        url: '/buttons/list-model',
-        icon: 'icon-cursor'
       }
     ]
   }

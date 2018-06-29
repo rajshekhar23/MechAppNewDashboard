@@ -52,7 +52,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
     AppAsideModule,
     AppBreadcrumbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule,
+    AngularFirestoreModule.enablePersistence(),
     AppFooterModule,
     AppHeaderModule,
     AppSidebarModule,

@@ -20,6 +20,14 @@
                 <option *ngFor='let type of brandList' [value]='type.id'>{{type.brandname}}</option>
               </select>
             </div>
+            <div class='col-md-1'>
+              <label> Model </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="selectedModel" (change)='getAllVariantList()'>
+                <option *ngFor='let type of modelList' [value]='type.id'>{{type.modelname}}</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -38,15 +46,16 @@
           <table class="table table-bordered table-striped table-condensed table-sm">
             <thead>
               <tr class='text-center'>
-                <th>No.</th>
-                <th>Vehicle Brand Name</th>
-                <th>Show Models</th>
-                <th>Edit</th>
-                <th>Remove</th>
+                <td>No.</td>
+                <td>Vehicle Brand Name</td>
+                <td>Show Models</td>
+                <td>Edit</td>
+                <td>Remove</td>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of brandList; let i = index" class='text-center'>
+              <tr *ngIf='isBrandListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr ng-if="brandList.length > 0" *ngFor="let row of brandList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.brandname}}</td>
                 <td (click)='showModelsList(row)'>
@@ -80,18 +89,60 @@
               <tr class='text-center'>
                 <td>No.</td>
                 <td>Vehicle Model Name</td>
+                <td>Show Variants</td>
                 <td>Edit</td>
                 <td>Remove</td>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of modelList; let i = index" class='text-center'>
+              <tr *ngIf='isModelListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr ng-if="modelList.length > 0" *ngFor="let row of modelList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.modelname}}</td>
+                <td (click)='showVariantsList(row)'>
+                  <i class="customIcons cui-list"></i>
+                </td>
                 <td (click)='editModel(row, modelModal)'>
                   <i class="customIcons cui-pencil"></i>
                 </td>
                 <td (click)='removeModel(row)'>
+                  <i class="customIcons cui-circle-x"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Vehicle Variant List
+          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(variantModal)'>
+            <i class="fa fa-plus"></i> Add New</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-condensed table-sm">
+            <thead>
+              <tr class='text-center'>
+                <td>No.</td>
+                <td>Vehicle Variant Name</td>
+                <td>Edit</td>
+                <td>Remove</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf='isVariantListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr ng-if="variantList.length > 0" *ngFor="let row of variantList; let i = index" class='text-center'>
+                <td>{{i + 1}}</td>
+                <td>{{row.variantname}}</td>
+                <td (click)='editVariant(row, variantModal)'>
+                  <i class="customIcons cui-pencil"></i>
+                </td>
+                <td (click)='removeVariant(row)'>
                   <i class="customIcons cui-circle-x"></i>
                 </td>
               </tr>
@@ -142,6 +193,27 @@
       <div class="form-group">
         <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewModel()' [disabled]='!modelname'>Add Model</button>
         <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateModel()' [disabled]='!modelname'>Update Model</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Modal -->
+<ng-template #variantModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <b *ngIf='isUpdate'>Update Variant</b>
+    <b *ngIf='!isUpdate'>Add New Variant</b>
+    <button type="button" class="close" (click)='closeModal()'>&times;</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <input type="text"  class="form-control" placeholder="Enter variant name" autofocus [(ngModel)]='variantname' [ngModelOptions]="{standalone: true}"
+          name='variantname' required="required">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewVariant()' [disabled]='!variantname'>Add Variant</button>
+        <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateVariant()' [disabled]='!variantname'>Update Variant</button>
       </div>
     </form>
   </div>

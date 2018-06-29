@@ -16,6 +16,7 @@ export class FirestoreDataService implements OnInit {
   models: Observable<Model[]>;
   model: Model;
   private vehiclesTypesList: any;
+  variants: Observable<Variant[]>;
   private allBrandsByVehicleType: any;
   constructor(private afs: AngularFirestore, private db: AngularFireDatabase,
   private _loadingBar: SlimLoadingBarService) {}
@@ -61,56 +62,25 @@ export class FirestoreDataService implements OnInit {
     });
     return this.models;
   }
-  /*
-  getModelDetailByBrand(brandId): Observable<any> {
-    this.models = this.afs
-      .collection<Vehicle>('vehiclemaster')
-      .doc(brandId)
-      .collection<Model>('model')
-      .snapshotChanges()
-      .map(actions => {
-        return actions.map(action => {
-          const data = action.payload.doc.data() as Model;
-          const id = action.payload.doc.id;
-          data['variants'] = [];
-          this.afs.collection<Vehicle>('vehiclemaster')
-          .doc(brandId).collection<Model>('model')
-          .doc(id).collection<Variant>('variants').ref.get()
-          .then( res => {
-            console.log(res);
-            if (res.docChanges().length !== 0) {
-              res.docChanges().map( document => {
-                const variantObject = {};
-                if ((document.doc.data() as Variant).variantname) {
-                  variantObject['variantName'] = (document.doc.data() as Variant).variantname;
-                  variantObject['variantId'] = document.doc.id;
-                  data['variants'].push(variantObject);
-                } else {
-                  data['variants'] = [];
-                }
-              });
-            }
-          });
-          console.log(data);
-          return { id, ...data , ...data['variants']};
-        });
+
+  getAllVariant(selectedVehicleType, selectedBrand, selectedModel): Observable<any> {
+    this.variants = this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(selectedBrand).collection('model')
+    .doc(selectedModel).collection('variant')
+    .snapshotChanges()
+    .map(actions => {
+      return actions.map(action => {
+        const data = action.payload.doc.data() as Variant;
+        const id = action.payload.doc.id;
+        return { id, ...data} ;
       });
-    return this.models;
-  }
-*/
-/*   addVehicleBrand(brandValue, selectedVehicleType): void {
-    console.log(brandValue);
-    console.log(selectedVehicleType);
-    let result: any;
-    this.afs.collection('vehiclemaster')
-    .add({'brand': brandValue, 'vehicletype': selectedVehicleType})
-    .then( docRef => {
-      result = 'success';
-    }).catch( error => {
-      result = 'Something went wrong';
     });
+    return this.variants;
   }
- */
+
+  funcRemoveModel() {
+  }
 
   addVehicleBrand(brandValue, selectedVehicleType): void {
     let result: any;
@@ -130,6 +100,20 @@ export class FirestoreDataService implements OnInit {
     .doc(selectedVehicleType).collection('brand')
     .doc(brandId).collection('model')
     .add({'modelname': modelname})
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  addVehicleVariant(selectedVehicleType, brandId, modelId, variantname): void {
+    let result: any;
+    this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(brandId).collection('model')
+    .doc(modelId).collection('variant')
+    .add({'variantname': variantname})
     .then( docRef => {
       result = 'success';
     }).catch( error => {
@@ -165,6 +149,22 @@ export class FirestoreDataService implements OnInit {
     });
   }
 
+  updateVariant(selectedVehicleType, brandId, modelId, variantId, variantname) {
+    console.log('params in updateVariant ', selectedVehicleType + ' ## ' + brandId  + ' ## ' + modelId  + ' ## ' + variantname);
+    let result: any;
+    this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(brandId).collection('model').doc(modelId)
+    .collection('variant').doc(variantId)
+    .set({
+      variantname: variantname
+    }).then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
   removeBrand(brandId, selectedVehicleType) {
     let result: any;
     this.afs.collection('vehicle')
@@ -181,6 +181,19 @@ export class FirestoreDataService implements OnInit {
     this.afs.collection('vehicle')
     .doc(selectedVehicleType).collection('brand')
     .doc(brandId).collection('model').doc(modelId)
+    .delete().then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  removeVariant(selectedVehicleType, brandId, modelId, variantId) {
+    let result: any;
+    this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(brandId).collection('model').doc(modelId)
+    .collection('variant').doc(variantId)
     .delete().then( docRef => {
       result = 'success';
     }).catch( error => {
