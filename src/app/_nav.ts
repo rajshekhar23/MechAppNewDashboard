@@ -87,8 +87,8 @@ export const navItems = [
         icon: 'icon-puzzle'
       }
     ]
-  }, */
-
+  },
+*/
   {
     name: 'Vehicle Master',
     url: '/buttons',
@@ -97,6 +97,18 @@ export const navItems = [
       {
         name: 'List Brand',
         url: '/buttons/list-brand',
+        icon: 'icon-cursor'
+      }
+    ]
+  },
+  {
+    name: 'Service Master',
+    url: '/servicemaster',
+    icon: 'icon-cursor',
+    children: [
+      {
+        name: 'List Service',
+        url: '/servicemaster/list-service',
         icon: 'icon-cursor'
       }
     ]

@@ -59,6 +59,10 @@ export const routes: Routes = [
         loadChildren: './views/buttons/buttons.module#ButtonsModule'
       },
       {
+        path: 'servicemaster',
+        loadChildren: './views/servicemaster/servicemaster.module#ServicemasterModule'
+      },
+      {
         path: 'charts',
         loadChildren: './views/chartjs/chartjs.module#ChartJSModule'
       },

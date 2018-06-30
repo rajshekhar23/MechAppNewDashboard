@@ -7,6 +7,8 @@ import { Vehicle } from './models/vehicles';
 import { Variant} from './models/variants';
 import { Model } from './models/models';
 import 'rxjs/add/operator/map';
+import { Service } from './models/services';
+import { SubService } from './models/subServices';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +16,8 @@ import 'rxjs/add/operator/map';
 
 export class FirestoreDataService implements OnInit {
   models: Observable<Model[]>;
+  servicesList: Observable<Service[]>;
+  subServicesList: Observable<SubService[]>;
   model: Model;
   private vehiclesTypesList: any;
   variants: Observable<Variant[]>;
@@ -23,8 +27,36 @@ export class FirestoreDataService implements OnInit {
 
   ngOnInit() {}
 
+  getServicesList(selectedVehicleType): Observable<any> {
+    this.servicesList = this.afs.collection('service_master', ref => ref.where('vehicle_type_id',
+    '==', selectedVehicleType))
+    .snapshotChanges()
+    .map(actions => {
+        return actions.map(action => {
+          const data = action.payload.doc.data() as Service;
+          const id = action.payload.doc.id;
+          return { id, ...data };
+        });
+    });
+    return this.servicesList;
+  }
+
+
+  getSubServicesList(selectedService): Observable<any> {
+    this.subServicesList = this.afs.collection('service_master').doc(selectedService)
+    .collection('sub_service')
+    .snapshotChanges()
+    .map(actions => {
+      return actions.map(action => {
+        const data = action.payload.doc.data() as SubService;
+        const id = action.payload.doc.id;
+        return { id, ...data };
+      });
+  });
+    return this.subServicesList;
+  }
+
   getVehicleMasterList(): Observable<any> {
-    this._loadingBar.start();
     this.vehiclesTypesList = this.afs.collection('vehicle').snapshotChanges()
     .map(actions => {
         return actions.map(action => {
@@ -79,7 +111,36 @@ export class FirestoreDataService implements OnInit {
     return this.variants;
   }
 
-  funcRemoveModel() {
+  getTaskList(selectedService, selectedSubService, task): Observable<any> {
+    this.variants = this.afs.collection('service_master')
+    .doc(selectedService).collection('sub_service')
+    .doc(selectedSubService).collection('task')
+    .snapshotChanges()
+    .map(actions => {
+      return actions.map(action => {
+        const data = action.payload.doc.data() as Variant;
+        const id = action.payload.doc.id;
+        return { id, ...data} ;
+      });
+    });
+    return this.variants;
+  }
+
+  addService(service): void {
+    console.log('addService params ', service);
+    let result: any;
+    this.afs.collection('service_master')
+    .add(
+      {'service_display_name': service.service_display_name,
+      'service_name': service.service_name,
+      'vehicle_type': service.vehicle_type,
+      'vehicle_type_id': service.vehicle_type_id
+    })
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
   }
 
   addVehicleBrand(brandValue, selectedVehicleType): void {
@@ -121,6 +182,36 @@ export class FirestoreDataService implements OnInit {
     });
   }
 
+  addSubService(selectedService, subService): void {
+    let result: any;
+    this.afs.collection('service_master')
+    .doc(selectedService).collection('sub_service')
+    .add({
+      'sub_service_display_name': subService.sub_service_display_name,
+      'sub_service_name': subService.sub_service_name})
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  addTask(selectedService, selectedSubService, task): void {
+    let result: any;
+    this.afs.collection('service_master')
+    .doc(selectedService).collection('sub_service')
+    .doc(selectedSubService).collection('task')
+    .add({
+      'task_description': task.task_description,
+      'task_name': task.task_name
+    })
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
   updateVehicleBrand(brandId, brandname, selectedType) {
     let result: any;
     this.afs.collection('vehicle').doc(selectedType)
@@ -134,8 +225,52 @@ export class FirestoreDataService implements OnInit {
     });
   }
 
+  updateService(selectedService, service) {
+    console.log('updateService params ', service);
+    let result: any;
+    this.afs.collection('service_master').doc(selectedService)
+    .set({
+      'service_display_name': service.service_display_name,
+      'service_name': service.service_name,
+      'vehicle_type': service.vehicle_type,
+      'vehicle_type_id': service.vehicle_type_id
+    }).then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  updateSubService(selectedService, subServiceId, subService) {
+    let result: any;
+    this.afs.collection('service_master').doc(selectedService)
+    .collection('sub_service').doc(subServiceId)
+    .set({
+      'sub_service_display_name': subService.sub_service_display_name,
+      'sub_service_name': subService.sub_service_name
+    }).then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  updateTask(selectedService, selectedSubService, taskId, task) {
+    let result: any;
+    this.afs.collection('service_master').doc(selectedService)
+    .collection('sub_service').doc(selectedSubService)
+    .collection('task').doc(taskId)
+    .set({
+      'task_description': task.task_description,
+      'task_name': task.task_name
+    }).then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
   updateModel(selectedVehicleType, brandId, modelId, modelname) {
-    console.log('params in updateModel ', selectedVehicleType + ' ## ' + brandId  + ' ## ' + modelId  + ' ## ' + modelname);
     let result: any;
     this.afs.collection('vehicle')
     .doc(selectedVehicleType).collection('brand')
@@ -150,7 +285,6 @@ export class FirestoreDataService implements OnInit {
   }
 
   updateVariant(selectedVehicleType, brandId, modelId, variantId, variantname) {
-    console.log('params in updateVariant ', selectedVehicleType + ' ## ' + brandId  + ' ## ' + modelId  + ' ## ' + variantname);
     let result: any;
     this.afs.collection('vehicle')
     .doc(selectedVehicleType).collection('brand')
@@ -194,6 +328,42 @@ export class FirestoreDataService implements OnInit {
     .doc(selectedVehicleType).collection('brand')
     .doc(brandId).collection('model').doc(modelId)
     .collection('variant').doc(variantId)
+    .delete().then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  removeMainService(selectedService) {
+    let result: any;
+    this.afs.collection('service_master')
+    .doc(selectedService)
+    .delete().then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  removeSubService(selectedService, selectedSubService) {
+    let result: any;
+    this.afs.collection('service_master')
+    .doc(selectedService).collection('sub_service')
+    .doc(selectedSubService)
+    .delete().then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  removeTask(selectedService, selectedSubService, taskId) {
+    let result: any;
+    this.afs.collection('service_master')
+    .doc(selectedService).collection('sub_service')
+    .doc(selectedSubService).collection('task')
+    .doc(taskId)
     .delete().then( docRef => {
       result = 'success';
     }).catch( error => {

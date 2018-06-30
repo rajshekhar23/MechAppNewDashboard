@@ -44,6 +44,7 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { SlimLoadingBarModule } from 'ng2-slim-loading-bar';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { ServicemasterComponent } from './views/servicemaster/servicemaster.component';
 
 @NgModule({
   imports: [
@@ -69,7 +70,8 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
     P404Component,
     P500Component,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    ServicemasterComponent
   ],
   providers: [{
     provide: LocationStrategy,

@@ -77,6 +77,9 @@ export class ListBrandComponent implements OnInit {
 
   openModal(content) {
     this.modelname = '';
+    this.variantname = '';
+    this.brandname = '';
+    this.isUpdate = false;
     this.ngModelRef = this.modalService.open(content, { centered: true });
   }
 

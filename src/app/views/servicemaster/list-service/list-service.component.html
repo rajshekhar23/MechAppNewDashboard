@@ -1,0 +1,240 @@
+<div class="animated fadeIn">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class='row'>
+            <div class='col-md-1'>
+              <label> Type </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="selectedVehicleType" (change)='getServicesList()'>
+                <option *ngFor='let type of vehicleTypeList' [value]='type.id'>{{type.type}}</option>
+              </select>
+            </div>
+            <div class='col-md-1'>
+              <label> Service </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="selectedService" (change)='getSubServicesList()'>
+                <option *ngFor='let type of serviceList' [value]='type.id'>{{type.service_display_name}}</option>
+              </select>
+            </div>
+            <div class='col-md-1'>
+              <label> Sub-Service </label>
+            </div>
+            <div class='col-md-3'>
+              <select class='form-control' [(ngModel)]="selectedSubService" (change)='getTaskList()'>
+                <option *ngFor='let type of subServiceList' [value]='type.id'>{{type.sub_service_display_name}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Service Master List
+          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(serviceModal)'>
+            <i class="fa fa-plus"></i> Add New</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-condensed table-sm">
+            <thead>
+              <tr class='text-center'>
+                <td>No.</td>
+                <td>Service Display Name</td>
+                <td>Service Name</td>
+                <td>Vehicle Type</td>
+                <td>Sub Services List</td>
+                <td>Edit</td>
+                <td>Remove</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf='isServiceListEmpty'>
+                <td colspan='5' class='text-center'>No records found</td>
+              </tr>
+              <tr ng-if="serviceList.length > 0" *ngFor="let row of serviceList; let i = index" class='text-center'>
+                <td>{{i + 1}}</td>
+                <td>{{row.service_display_name}}</td>
+                <td>{{row.service_name}}</td>
+                <td>{{row.vehicle_type}}</td>
+                <td (click)='showSubServicesList(row)'>
+                  <i class="customIcons cui-list"></i>
+                </td>
+                <td (click)='editMainService(row, serviceModal)'>
+                  <i class="customIcons cui-pencil"></i>
+                </td>
+                <td (click)='removeMainService(row)'>
+                  <i class="customIcons cui-circle-x"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Sub Service List
+          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(subServiceModal)'>
+            <i class="fa fa-plus"></i> Add New</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-condensed table-sm">
+            <thead>
+              <tr class='text-center'>
+                <td>No.</td>
+                <td>Sub Service Display Name</td>
+                <td>Sub Service Name</td>
+                <td>Task List</td>
+                <td>Edit</td>
+                <td>Remove</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf='isSubServiceListEmpty'>
+                <td colspan='6' class='text-center'>No records found</td>
+              </tr>
+              <tr ng-if="subServiceList.length > 0" *ngFor="let row of subServiceList; let i = index" class='text-center'>
+                <td>{{i + 1}}</td>
+                <td>{{row.sub_service_display_name}}</td>
+                <td>{{row.sub_service_name}}</td>
+                <td (click)='showVariantsList(row)'>
+                  <i class="customIcons cui-list"></i>
+                </td>
+                <td (click)='editSubService(row, subServiceModal)'>
+                  <i class="customIcons cui-pencil"></i>
+                </td>
+                <td (click)='removeSubService(row)'>
+                  <i class="customIcons cui-circle-x"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--/.col-->
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Task List
+          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(taskModal)'>
+            <i class="fa fa-plus"></i> Add New</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-condensed table-sm">
+            <thead>
+              <tr class='text-center'>
+                <td>No.</td>
+                <td>Task Name</td>
+                <td>Task Description</td>
+                <td>Edit</td>
+                <td>Remove</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf='isTaskListEmpty'>
+                <td colspan='5' class='text-center'>No records found</td>
+              </tr>
+              <tr ng-if="taskList.length > 0" *ngFor="let row of taskList; let i = index" class='text-center'>
+                <td>{{i + 1}}</td>
+                <td>{{row.task_description}}</td>
+                <td>{{row.task_name}}</td>
+                <td (click)='editTask(row, taskModal)'>
+                  <i class="customIcons cui-pencil"></i>
+                </td>
+                <td (click)='removeTask(row)'>
+                  <i class="customIcons cui-circle-x"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<ng-template #serviceModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <b *ngIf='isUpdate'>Update Service</b>
+    <b *ngIf='!isUpdate'>Add New Service</b>
+    <button type="button" class="close" (click)='closeModal()'>&times;</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Enter service display name" autofocus [(ngModel)]='service.service_display_name' [ngModelOptions]="{standalone: true}"
+          required="required"><br>
+        <input type="text" class="form-control" placeholder="Enter service name" autofocus [(ngModel)]='service.service_name' [ngModelOptions]="{standalone: true}"
+          required="required"><br>
+        <input type="text" class="form-control" *ngIf='isUpdate' [disabled]=true autofocus [(ngModel)]='service.vehicle_type' [ngModelOptions]="{standalone: true}"
+          required="required">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewService()' [disabled]='!service'>Add Service</button>
+        <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateService()' [disabled]='!service'>Update Service</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #subServiceModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <b *ngIf='isUpdate'>Update Sub Service</b>
+    <b *ngIf='!isUpdate'>Add New Sub Service</b>
+    <button type="button" class="close" (click)='closeModal()'>&times;</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Enter sub service display name" autofocus [(ngModel)]='subService.sub_service_display_name' [ngModelOptions]="{standalone: true}"
+          required="required"><br>
+        <input type="text" class="form-control" placeholder="Enter sub service name" autofocus [(ngModel)]='subService.sub_service_name' [ngModelOptions]="{standalone: true}"
+          required="required"><br>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewSubService()' [disabled]='!subService'>Add Sub Service</button>
+        <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateSubService()' [disabled]='!subService'>Update Sub Service</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #taskModal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <b *ngIf='isUpdate'>Update Task</b>
+      <b *ngIf='!isUpdate'>Add New Task</b>
+      <button type="button" class="close" (click)='closeModal()'>&times;</button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Enter task description" autofocus [(ngModel)]='task.task_description' [ngModelOptions]="{standalone: true}"
+            required="required"><br>
+          <input type="text" class="form-control" placeholder="Enter task name" autofocus [(ngModel)]='task.task_name' [ngModelOptions]="{standalone: true}"
+            required="required"><br>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addTask()' [disabled]='!task'>Add Task</button>
+          <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateTask()' [disabled]='!task'>Update Task</button>
+        </div>
+      </form>
+    </div>
+</ng-template>
