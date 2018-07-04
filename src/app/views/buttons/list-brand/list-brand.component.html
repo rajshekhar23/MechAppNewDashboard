@@ -54,7 +54,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngIf='isBrandListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr *ngIf='isBrandListEmpty'>
+                <td colspan='5' class='text-center'>No records found</td>
+              </tr>
               <tr ng-if="brandList.length > 0" *ngFor="let row of brandList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.brandname}}</td>
@@ -95,7 +97,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngIf='isModelListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr *ngIf='isModelListEmpty'>
+                <td colspan='5' class='text-center'>No records found</td>
+              </tr>
               <tr ng-if="modelList.length > 0" *ngFor="let row of modelList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.modelname}}</td>
@@ -122,7 +126,9 @@
         <div class="card-header">
           <i class="fa fa-align-justify"></i> Vehicle Variant List
           <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(variantModal)'>
-            <i class="fa fa-plus"></i> Add New</button>
+            <i class="fa fa-plus" style='margin:0 4px;'></i> Add New</button>
+          <button type="button" style='margin:0 4px;' class="btn btn-info add-new pull-right" (click)='openModal(serviceToVarinatsModal)'>
+            <i class="fa fa-plus"></i> Add Services</button>
         </div>
         <div class="card-body">
           <table class="table table-bordered table-striped table-condensed table-sm">
@@ -130,15 +136,19 @@
               <tr class='text-center'>
                 <td>No.</td>
                 <td>Vehicle Variant Name</td>
+                <td>Add Services</td>
                 <td>Edit</td>
                 <td>Remove</td>
               </tr>
             </thead>
             <tbody>
-              <tr *ngIf='isVariantListEmpty'><td colspan='5' class='text-center'>No records found</td></tr>
+              <tr *ngIf='isVariantListEmpty'>
+                <td colspan='5' class='text-center'>No records found</td>
+              </tr>
               <tr ng-if="variantList.length > 0" *ngFor="let row of variantList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.variantname}}</td>
+                <td><button class='btn btn-success btn-sm' (click)='editVariant(row, serviceToVarinatsModal)'>Add Services</button></td>
                 <td (click)='editVariant(row, variantModal)'>
                   <i class="customIcons cui-pencil"></i>
                 </td>
@@ -166,8 +176,8 @@
   <div class="modal-body">
     <form>
       <div class="form-group">
-        <input type="text" (keyup.enter)='updateBrand()' class="form-control" placeholder="Enter brand name" autofocus  [(ngModel)]='brandname' [ngModelOptions]="{standalone: true}"
-          name='brandname' required="required">
+        <input type="text" (keyup.enter)='updateBrand()' class="form-control" placeholder="Enter brand name" autofocus [(ngModel)]='brandname'
+          [ngModelOptions]="{standalone: true}" name='brandname' required="required">
       </div>
       <div class="form-group">
         <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewBrand()' [disabled]='!brandname'>Add Brand</button>
@@ -187,8 +197,8 @@
   <div class="modal-body">
     <form>
       <div class="form-group">
-        <input type="text" (keyup.enter)='updateModel()' class="form-control" placeholder="Enter model name" autofocus [(ngModel)]='modelname' [ngModelOptions]="{standalone: true}"
-          name='modelname' required="required">
+        <input type="text" (keyup.enter)='updateModel()' class="form-control" placeholder="Enter model name" autofocus [(ngModel)]='modelname'
+          [ngModelOptions]="{standalone: true}" name='modelname' required="required">
       </div>
       <div class="form-group">
         <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewModel()' [disabled]='!modelname'>Add Model</button>
@@ -208,12 +218,50 @@
   <div class="modal-body">
     <form>
       <div class="form-group">
-        <input type="text"  class="form-control" placeholder="Enter variant name" autofocus [(ngModel)]='variantname' [ngModelOptions]="{standalone: true}"
+        <input type="text" class="form-control" placeholder="Enter variant name" autofocus [(ngModel)]='variantname' [ngModelOptions]="{standalone: true}"
           name='variantname' required="required">
       </div>
       <div class="form-group">
         <button class="btn btn-primary btn-block btn-md" *ngIf='!isUpdate' (click)='addNewVariant()' [disabled]='!variantname'>Add Variant</button>
         <button class="btn btn-warning btn-block btn-md" *ngIf='isUpdate' (click)='updateVariant()' [disabled]='!variantname'>Update Variant</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #serviceToVarinatsModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <b *ngIf='isUpdate'>Update Task</b>
+    <b *ngIf='!isUpdate'>Add New Task</b>
+    <button type="button" class="close" (click)='closeModal()'>&times;</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+          <input type="text" class="form-control" placeholder="Enter variant name" autofocus [(ngModel)]='variantname' [ngModelOptions]="{standalone: true}"
+          name='variantname' required="required"><br>
+        <select [(ngModel)]='selectedServices' (change)='loadSubServices()' name="selectedServices[]" multiple class="form-control">
+          <option [value]="service.id" *ngFor='let service of serviceList'>{{service.service_display_name}}</option>
+        </select>
+        <br/>
+        <select [(ngModel)]='selectedSubServices' [disabled]='true' (change)='loadSubServices()' name="selectedSubServices[]" multiple class="form-control">
+          <option [value]="subService.id" *ngFor='let subService of subServiceList'>{{subService.sub_service_display_name}}</option>
+        </select>
+        <br/>
+        <table>
+          <tr *ngFor="let subService of subServiceList; let in = index">
+            <td><label>{{subService.sub_service_display_name}}</label></td>
+            <td>
+              <input class='form-control' placeholder='Enter price' type="text" [(ngModel)]="subService.price" [ngModelOptions]="{standalone: true}">
+            </td>
+            <td>
+              <input class='form-control' type="text" placeholder='Enter discount' [(ngModel)]="subService.discount" [ngModelOptions]="{standalone: true}">
+            </td>
+          </tr><br>
+        </table><br>
+        <button type="button" class="btn btn-success btn-block" (click)='showAllPrices()'> SUBMIT </button>
+      </div>
+      <div class="form-group">
       </div>
     </form>
   </div>

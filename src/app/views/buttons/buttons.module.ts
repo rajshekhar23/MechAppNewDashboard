@@ -14,13 +14,16 @@ import { DropdownsComponent } from './dropdowns.component';
 import { ButtonsComponent } from './buttons.component';
 import { ListModelComponent } from './list-model/list-model.component';
 // Angular
-
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { MultiselectDropdownModule } from 'angular-2-dropdown-multiselect';
 @NgModule({
   imports: [
     CommonModule,
     ButtonsRoutingModule,
     BsDropdownModule.forRoot(),
     NgbModule.forRoot(),
+    NgMultiSelectDropDownModule.forRoot(),
+    MultiselectDropdownModule,
     FormsModule
   ],
   declarations: [

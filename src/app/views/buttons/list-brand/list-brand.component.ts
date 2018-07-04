@@ -1,3 +1,6 @@
+
+import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 import { Variant } from './../../../models/variants';
 import { Model } from './../../../models/models';
 import { Router } from '@angular/router';
@@ -7,6 +10,8 @@ import { SlimLoadingBarService } from 'ng2-slim-loading-bar';
 import { Vehicle } from '../../../models/vehicles';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import * as $ from 'jquery';
+import { Service } from '../../../models/services';
+import { SubService } from '../../../models/subServices';
 
 @Component({
   selector: 'app-list-brand',
@@ -21,6 +26,7 @@ export class ListBrandComponent implements OnInit {
   selectedModel: string;
   selectedVehicleType: string;
   selectedBrand: string;
+  selectedVariant: string;
   modelname: string;
   isBrandListEmpty: any;
   isModelListEmpty: any;
@@ -32,11 +38,20 @@ export class ListBrandComponent implements OnInit {
   variantId: string;
   ngModelRef: any;
   isUpdate: any;
+  selectedServices: Service[];
+  selectedSubServices: SubService[];
+  serviceList: any;
+  subServiceList: any;
   $: any;
+  selectedOptions: any;
   constructor(private _firestoreDataService: FirestoreDataService, private _loadingBar: SlimLoadingBarService,
-  private modalService: NgbModal, private router: Router) { }
+  private modalService: NgbModal, private router: Router, private afs: AngularFirestore) { }
 
   ngOnInit() {
+    this._firestoreDataService.getAllServiceListWithoutFilter().subscribe( data => {
+      this.serviceList = data;
+      console.log(this.serviceList);
+    });
     this.isUpdate = false;
     this.selectedVehicleType = 'pM0luQDMCvCvDxJcedDn';
     this._firestoreDataService.getVehicleMasterList().subscribe( data => {
@@ -44,6 +59,43 @@ export class ListBrandComponent implements OnInit {
       console.log(this.vehicleTypeList);
       this.getAllBrandByVehicleType();
     });
+  }
+
+  onItemSelect(item: any) {
+    console.log(item);
+  }
+
+  showAllPrices() {
+    console.log(this.subServiceList);
+    this.addServicesToVariant();
+  }
+
+  loadSubServices() {
+    this.subServiceList = [];
+    this.selectedServices.forEach( selectedService => {
+      this._firestoreDataService.getAllSubServiceList(selectedService).subscribe( data => {
+        data.forEach( subService => {
+          this.subServiceList.push({
+            id: subService.id,
+            sub_service_display_name: subService.sub_service_display_name,
+            price: null,
+            discount: null,
+            service: '/service_master/' + selectedService + '/sub_service/' + subService.id
+          });
+        });
+      });
+    });
+  }
+
+  addServicesToVariant() {
+    console.log('addServicesToVariant params', this.selectedVehicleType + '##' + this.brandId + '##' + this.modelId);
+    this._firestoreDataService.addServicesToVariant(this.subServiceList, this.selectedVehicleType, this.selectedBrand,
+       this.selectedModel, this.variantId, this.variantname);
+    this.ngModelRef.close();
+  }
+
+  onSelectAll(item: any) {
+
   }
 
   getAllBrandByVehicleType() {
@@ -111,6 +163,7 @@ export class ListBrandComponent implements OnInit {
     this.brandId = brandDetails.id;
     this.ngModelRef = this.modalService.open(content, { centered: true});
     this.isUpdate = true;
+    this.subServiceList = [];
   }
 
   editModel(modelDetails, content) {

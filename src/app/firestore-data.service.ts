@@ -27,6 +27,18 @@ export class FirestoreDataService implements OnInit {
 
   ngOnInit() {}
 
+  getAllServiceListWithoutFilter(): Observable<any> {
+    this.servicesList = this.afs.collection('service_master').snapshotChanges()
+    .map(actions => {
+      return actions.map(action => {
+        const data = action.payload.doc.data() as Service;
+        const id = action.payload.doc.id;
+        return { id, ...data };
+      });
+    });
+    return this.servicesList;
+  }
+
   getServicesList(selectedVehicleType): Observable<any> {
     this.servicesList = this.afs.collection('service_master', ref => ref.where('vehicle_type_id',
     '==', selectedVehicleType))
@@ -41,7 +53,37 @@ export class FirestoreDataService implements OnInit {
     return this.servicesList;
   }
 
+  addServicesToVariant(subServiceList, selectedVehicleType, selectedBrand, selectedModel, selectedVariant, variantname): void {
+    let result: any;
+    this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(selectedBrand).collection('model')
+    .doc(selectedModel).collection('variant')
+    .doc(selectedVariant)
+    .set({
+        'services': subServiceList,
+        'variantname': variantname
+      })
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
 
+  getAllSubServiceList(selectedService): Observable<SubService[]> {
+    this.subServicesList = this.afs.collection('service_master').doc(selectedService)
+    .collection('sub_service')
+    .snapshotChanges()
+    .map(actions => {
+      return actions.map(action => {
+        const data = action.payload.doc.data() as SubService;
+        const id = action.payload.doc.id;
+        return { id, ...data };
+      });
+    });
+    return this.subServicesList;
+  }
   getSubServicesList(selectedService): Observable<any> {
     this.subServicesList = this.afs.collection('service_master').doc(selectedService)
     .collection('sub_service')
@@ -52,7 +94,7 @@ export class FirestoreDataService implements OnInit {
         const id = action.payload.doc.id;
         return { id, ...data };
       });
-  });
+    });
     return this.subServicesList;
   }
 
