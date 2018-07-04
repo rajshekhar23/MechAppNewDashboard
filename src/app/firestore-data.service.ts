@@ -53,7 +53,24 @@ export class FirestoreDataService implements OnInit {
     return this.servicesList;
   }
 
-  addServicesToVariant(subServiceList, selectedVehicleType, selectedBrand, selectedModel, selectedVariant, variantname): void {
+  addServicesToVariant(subServiceList, selectedVehicleType, selectedBrand, selectedModel, variantname): void {
+    let result: any;
+    this.afs.collection('vehicle')
+    .doc(selectedVehicleType).collection('brand')
+    .doc(selectedBrand).collection('model')
+    .doc(selectedModel).collection('variant')
+    .add({
+        'services': subServiceList,
+        'variantname': variantname
+      })
+    .then( docRef => {
+      result = 'success';
+    }).catch( error => {
+      result = 'Something went wrong';
+    });
+  }
+
+  updateServiceToVariant(subServiceList, selectedVehicleType, selectedBrand, selectedModel, selectedVariant, variantname): void {
     let result: any;
     this.afs.collection('vehicle')
     .doc(selectedVehicleType).collection('brand')

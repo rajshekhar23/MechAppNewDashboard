@@ -88,10 +88,19 @@ export class ListBrandComponent implements OnInit {
   }
 
   addServicesToVariant() {
-    console.log('addServicesToVariant params', this.selectedVehicleType + '##' + this.brandId + '##' + this.modelId);
     this._firestoreDataService.addServicesToVariant(this.subServiceList, this.selectedVehicleType, this.selectedBrand,
-       this.selectedModel, this.variantId, this.variantname);
+       this.selectedModel, this.variantname);
     this.ngModelRef.close();
+  }
+
+  updateServiceToVariant() {
+    this._firestoreDataService.updateServiceToVariant(this.subServiceList, this.selectedVehicleType, this.selectedBrand,
+      this.selectedModel, this.variantId, this.variantname);
+   this.ngModelRef.close();
+   this.subServiceList = [];
+   this.selectedServices = [];
+   this.selectedSubServices = [];
+   this.isUpdate = false;
   }
 
   onSelectAll(item: any) {

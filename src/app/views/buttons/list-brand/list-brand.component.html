@@ -125,10 +125,10 @@
       <div class="card">
         <div class="card-header">
           <i class="fa fa-align-justify"></i> Vehicle Variant List
-          <button type="button" class="btn btn-info add-new pull-right" (click)='openModal(variantModal)'>
+          <button type="button" *ngIf='false' class="btn btn-info add-new pull-right" (click)='openModal(variantModal)'>
             <i class="fa fa-plus" style='margin:0 4px;'></i> Add New</button>
           <button type="button" style='margin:0 4px;' class="btn btn-info add-new pull-right" (click)='openModal(serviceToVarinatsModal)'>
-            <i class="fa fa-plus"></i> Add Services</button>
+            <i class="fa fa-plus"></i> Add New</button>
         </div>
         <div class="card-body">
           <table class="table table-bordered table-striped table-condensed table-sm">
@@ -136,7 +136,6 @@
               <tr class='text-center'>
                 <td>No.</td>
                 <td>Vehicle Variant Name</td>
-                <td>Add Services</td>
                 <td>Edit</td>
                 <td>Remove</td>
               </tr>
@@ -148,8 +147,7 @@
               <tr ng-if="variantList.length > 0" *ngFor="let row of variantList; let i = index" class='text-center'>
                 <td>{{i + 1}}</td>
                 <td>{{row.variantname}}</td>
-                <td><button class='btn btn-success btn-sm' (click)='editVariant(row, serviceToVarinatsModal)'>Add Services</button></td>
-                <td (click)='editVariant(row, variantModal)'>
+                <td (click)='editVariant(row, serviceToVarinatsModal)'>
                   <i class="customIcons cui-pencil"></i>
                 </td>
                 <td (click)='removeVariant(row)'>
@@ -231,8 +229,8 @@
 
 <ng-template #serviceToVarinatsModal let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <b *ngIf='isUpdate'>Update Task</b>
-    <b *ngIf='!isUpdate'>Add New Task</b>
+    <b *ngIf='isUpdate'>Update Variant</b>
+    <b *ngIf='!isUpdate'>Add New Variant</b>
     <button type="button" class="close" (click)='closeModal()'>&times;</button>
   </div>
   <div class="modal-body">
@@ -259,7 +257,8 @@
             </td>
           </tr><br>
         </table><br>
-        <button type="button" class="btn btn-success btn-block" (click)='showAllPrices()'> SUBMIT </button>
+        <button type="button" class="btn btn-success btn-block" *ngIf='!isUpdate' (click)='addServicesToVariant()'> ADD </button>
+        <button type="button" class="btn btn-success btn-block" *ngIf='isUpdate' (click)='updateServiceToVariant()'> Update </button>
       </div>
       <div class="form-group">
       </div>
