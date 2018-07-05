@@ -48,8 +48,10 @@ export class ListBrandComponent implements OnInit {
   private modalService: NgbModal, private router: Router, private afs: AngularFirestore) { }
 
   ngOnInit() {
+    localStorage.clear();
     this._firestoreDataService.getAllServiceListWithoutFilter().subscribe( data => {
       this.serviceList = data;
+      localStorage.setItem('serviceList', JSON.stringify(this.serviceList));
       console.log(this.serviceList);
     });
     this.isUpdate = false;
@@ -78,8 +80,8 @@ export class ListBrandComponent implements OnInit {
           this.subServiceList.push({
             id: subService.id,
             sub_service_display_name: subService.sub_service_display_name,
-            price: null,
-            discount: null,
+            price: subService.price,
+            discount: subService.discount,
             service: '/service_master/' + selectedService + '/sub_service/' + subService.id
           });
         });
@@ -141,6 +143,8 @@ export class ListBrandComponent implements OnInit {
     this.variantname = '';
     this.brandname = '';
     this.isUpdate = false;
+    this.subServiceList = [];
+    this.selectedServices = [];
     this.ngModelRef = this.modalService.open(content, { centered: true });
   }
 
@@ -183,6 +187,22 @@ export class ListBrandComponent implements OnInit {
   }
 
   editVariant(variantDetails, content) {
+    const selectedServices = [];
+    const selectedSubServices = [];
+    this.subServiceList = [];
+    variantDetails.services.forEach(service => {
+      console.log(service);
+      selectedServices.push(service.service.split('/')[2]);
+      selectedSubServices.push(service.service.split('/')[4]);
+      this.subServiceList.push({
+        id: service.id,
+        sub_service_display_name: service.sub_service_display_name,
+        price: service.price,
+        discount: service.discount,
+        service: '/service_master/' + service.service.split('/')[2] + '/sub_service/' + service.service.split('/')[2]
+      });
+    });
+    this.selectedServices = selectedServices;
     this.variantname = variantDetails.variantname;
     this.variantId = variantDetails.id;
     this.ngModelRef = this.modalService.open(content, { centered: true});

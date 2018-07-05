@@ -242,7 +242,7 @@
           <option [value]="service.id" *ngFor='let service of serviceList'>{{service.service_display_name}}</option>
         </select>
         <br/>
-        <select [(ngModel)]='selectedSubServices' [disabled]='true' (change)='loadSubServices()' name="selectedSubServices[]" multiple class="form-control">
+        <select [(ngModel)]='selectedSubServices' [disabled]='true' name="selectedSubServices[]" multiple class="form-control">
           <option [value]="subService.id" *ngFor='let subService of subServiceList'>{{subService.sub_service_display_name}}</option>
         </select>
         <br/>
@@ -257,7 +257,7 @@
             </td>
           </tr><br>
         </table><br>
-        <button type="button" class="btn btn-success btn-block" *ngIf='!isUpdate' (click)='addServicesToVariant()'> ADD </button>
+        <button type="button" class="btn btn-info btn-block" *ngIf='!isUpdate' (click)='addServicesToVariant()'> ADD </button>
         <button type="button" class="btn btn-success btn-block" *ngIf='isUpdate' (click)='updateServiceToVariant()'> Update </button>
       </div>
       <div class="form-group">
