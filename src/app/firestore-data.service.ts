@@ -27,8 +27,10 @@ export class FirestoreDataService implements OnInit {
 
   ngOnInit() {}
 
-  getAllServiceListWithoutFilter(): Observable<any> {
-    this.servicesList = this.afs.collection('service_master').snapshotChanges()
+  getAllServiceListWithoutFilter(selectedVehicleType): Observable<any> {
+    this.servicesList = this.afs.collection('service_master', ref => ref.where('vehicle_type_id',
+   '==', selectedVehicleType))
+    .snapshotChanges()
     .map(actions => {
       return actions.map(action => {
         const data = action.payload.doc.data() as Service;

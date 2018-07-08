@@ -42,49 +42,68 @@ export class ListBrandComponent implements OnInit {
   selectedSubServices: SubService[];
   serviceList: any;
   subServiceList: any;
+  tempSubServiceList: any;
   $: any;
   selectedOptions: any;
+
   constructor(private _firestoreDataService: FirestoreDataService, private _loadingBar: SlimLoadingBarService,
   private modalService: NgbModal, private router: Router, private afs: AngularFirestore) { }
 
   ngOnInit() {
-    localStorage.clear();
-    this._firestoreDataService.getAllServiceListWithoutFilter().subscribe( data => {
-      this.serviceList = data;
-      localStorage.setItem('serviceList', JSON.stringify(this.serviceList));
-      console.log(this.serviceList);
-    });
+    this.subServiceList = [];
+    this.tempSubServiceList = [];
     this.isUpdate = false;
     this.selectedVehicleType = 'pM0luQDMCvCvDxJcedDn';
+    this.loadServices();
     this._firestoreDataService.getVehicleMasterList().subscribe( data => {
       this.vehicleTypeList = data;
-      console.log(this.vehicleTypeList);
       this.getAllBrandByVehicleType();
     });
   }
 
   onItemSelect(item: any) {
-    console.log(item);
   }
 
   showAllPrices() {
-    console.log(this.subServiceList);
     this.addServicesToVariant();
+  }
+
+  isSubServiceExist(subService) {
+    let subServiceTemp: any;
+    this.tempSubServiceList.forEach( sService => {
+      if (subService.sub_service_display_name === sService.sub_service_display_name) {
+        subServiceTemp = sService;
+      }
+    });
+    return subServiceTemp;
+  }
+
+  loadServices() {
+    this._firestoreDataService.getAllServiceListWithoutFilter(this.selectedVehicleType).subscribe( data => {
+      this.serviceList = data;
+    });
   }
 
   loadSubServices() {
     this.subServiceList = [];
+    if (!this.isUpdate) {
+      this.tempSubServiceList = [];
+    }
     this.selectedServices.forEach( selectedService => {
       this._firestoreDataService.getAllSubServiceList(selectedService).subscribe( data => {
         data.forEach( subService => {
-          this.subServiceList.push({
-            id: subService.id,
-            sub_service_display_name: subService.sub_service_display_name,
-            price: subService.price,
-            discount: subService.discount,
-            service: '/service_master/' + selectedService + '/sub_service/' + subService.id
+            const tempSubService = this.isSubServiceExist(subService);
+            if (tempSubService) {
+              subService = tempSubService;
+            }
+            this.subServiceList.push({
+              id: subService.id,
+              sub_service_display_name: subService.sub_service_display_name,
+              price: subService.price,
+              discount: subService.discount,
+              service: '/service_master/' + selectedService + '/sub_service/' + subService.id
+            });
           });
-        });
       });
     });
   }
@@ -125,6 +144,7 @@ export class ListBrandComponent implements OnInit {
   getSelectedType() {
     this.clearAll();
     this.getAllBrandByVehicleType();
+    this.loadServices();
   }
 
   clearAll() {
@@ -190,8 +210,13 @@ export class ListBrandComponent implements OnInit {
     const selectedServices = [];
     const selectedSubServices = [];
     this.subServiceList = [];
+    this.tempSubServiceList = [];
+    this.variantname = variantDetails.variantname;
+    this.variantId = variantDetails.id;
+    this.ngModelRef = this.modalService.open(content, { centered: true});
+    this.isUpdate = true;
+    if (variantDetails.services) {
     variantDetails.services.forEach(service => {
-      console.log(service);
       selectedServices.push(service.service.split('/')[2]);
       selectedSubServices.push(service.service.split('/')[4]);
       this.subServiceList.push({
@@ -201,12 +226,16 @@ export class ListBrandComponent implements OnInit {
         discount: service.discount,
         service: '/service_master/' + service.service.split('/')[2] + '/sub_service/' + service.service.split('/')[2]
       });
+      this.tempSubServiceList.push({
+        id: service.id,
+        sub_service_display_name: service.sub_service_display_name,
+        price: service.price,
+        discount: service.discount,
+        service: '/service_master/' + service.service.split('/')[2] + '/sub_service/' + service.service.split('/')[2]
+      });
     });
+    }
     this.selectedServices = selectedServices;
-    this.variantname = variantDetails.variantname;
-    this.variantId = variantDetails.id;
-    this.ngModelRef = this.modalService.open(content, { centered: true});
-    this.isUpdate = true;
   }
   updateBrand() {
     this._firestoreDataService.updateVehicleBrand(this.brandId, this.brandname, this.selectedVehicleType);
